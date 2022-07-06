@@ -7,9 +7,11 @@ This repository serves as an example and proof of concept for an ASP.NET Core v5
 ## TODO
 
 - [x] Create project from template
-- [ ] Create sql database structure using entity framework
+- [x] Create sql database structure using entity framework
+- [x] Setup Entity Framework Migrations
+- [x] Create Initial Migration seed.
 - [ ] Create CRUD RESTful endpoints using ASP.NET core
-- [ ] Create dockerfile
+- [x] Create dockerfile
 - [ ] Create example configuration
 
 ## License
