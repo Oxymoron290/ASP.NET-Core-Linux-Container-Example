@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
-using CohoWineryAPI.Data;
+using CohoWineryAPI.Model;
 
 namespace CohoWineryAPI.Controllers
 {
@@ -25,7 +25,7 @@ namespace CohoWineryAPI.Controllers
         public IEnumerable<Product> GetProducts()
         {
             _logger.LogInformation("Retreiving products.");
-            return _context.Products;
+            return _context.Products.Select(p => new Product { Id = p.Id, Name = p.Name, Style = p.Style}).ToList();
         }
 
         [HttpGet]
@@ -33,8 +33,23 @@ namespace CohoWineryAPI.Controllers
         public IEnumerable<Order> GetOrders()
         {
             _logger.LogInformation("Retreiving orders.");
-            var result = _context.Orders.Include(oi => oi.OrderItems);
-            return result;
+            return _context.Orders.Select(o => new Order
+            {
+                Id = o.Id,
+                CustomerId = o.CustomerId,
+                DeliveryAddress = o.DeliveryAddress,
+                OrderItems = o.OrderItems.Select(oi => new OrderItem
+                {
+                    Id = oi.Id,
+                    Quantity = oi.Quantity,
+                    Product = new Product
+                    {
+                        Id = oi.Product.Id,
+                        Name = oi.Product.Name,
+                        Style = oi.Product.Style,
+                    }
+                }).ToList()
+            });
         }
 
         [HttpGet]
@@ -42,7 +57,23 @@ namespace CohoWineryAPI.Controllers
         public Order GetOrder(int id)
         {
             _logger.LogInformation($"Retreiving order by id {id}.");
-            return _context.Orders.FirstOrDefault(o => o.Id == id);
+            return _context.Orders.Select(o => new Order
+            {
+                Id = o.Id,
+                CustomerId = o.CustomerId,
+                DeliveryAddress = o.DeliveryAddress,
+                OrderItems = o.OrderItems.Select(oi => new OrderItem
+                {
+                    Id = oi.Id,
+                    Quantity = oi.Quantity,
+                    Product = new Product
+                    {
+                        Id = oi.Product.Id,
+                        Name = oi.Product.Name,
+                        Style = oi.Product.Style,
+                    }
+                }).ToList()
+            }).FirstOrDefault(o => o.Id == id);
         }
 
         [HttpPost]
@@ -50,8 +81,33 @@ namespace CohoWineryAPI.Controllers
         public Order CreateOrder(Order order)
         {
             _logger.LogInformation("Creating order.");
-            _context.Orders.Add(order);
+            var o = new Data.Order()
+            {
+                CustomerId = order.CustomerId,
+                DeliveryAddress = order.DeliveryAddress
+            };
+            var items = order.OrderItems.Select(oi => new Data.OrderItem
+            {
+                Quantity = oi.Quantity,
+                ProductId = oi.Product.Id,
+                Order = o
+            });
+
+            _context.Orders.Add(o);
+            _context.OrderItems.AddRange(items);
             _context.SaveChanges();
+
+            order.Id = o.Id;
+            order.OrderItems = o.OrderItems.Select(oi => new OrderItem
+            {
+                Id = oi.Id,
+                Quantity = oi.Quantity,
+                Product = new Product
+                {
+                    Id = oi.ProductId
+                    // TODO: name and style.
+                }
+            }).ToList();
             _logger.LogInformation($"Created order {order.Id}");
             return order;
         }
@@ -61,7 +117,7 @@ namespace CohoWineryAPI.Controllers
         public void DeleteOrder(int id)
         {
             _logger.LogInformation("Deleting order.");
-            var order = new Order() { Id = id };
+            var order = new Data.Order() { Id = id };
             _context.Attach(order);
             _context.Remove(order);
             _context.SaveChanges();
