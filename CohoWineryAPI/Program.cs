@@ -19,7 +19,7 @@ namespace CohoWineryAPI
             
             using (var scope = host.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<VineyardContext>();
+                var db = scope.ServiceProvider.GetRequiredService<Data.VineyardContext>();
                 db.Database.Migrate();
             }
 

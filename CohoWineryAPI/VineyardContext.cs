@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace CohoWineryAPI
+namespace CohoWineryAPI.Data
 {
     public class VineyardContext : DbContext
     {
