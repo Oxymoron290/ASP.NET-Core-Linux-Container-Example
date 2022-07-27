@@ -16,11 +16,18 @@ namespace CohoWineryAPI
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            
-            using (var scope = host.Services.CreateScope())
+
+            try
             {
-                var db = scope.ServiceProvider.GetRequiredService<Data.VineyardContext>();
-                db.Database.Migrate();
+                using (var scope = host.Services.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<Data.VineyardContext>();
+                    db.Database.Migrate();
+                }
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             host.Run();
