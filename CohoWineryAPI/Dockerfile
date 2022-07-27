@@ -1,6 +1,6 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -19,4 +19,11 @@ RUN dotnet publish "CohoWineryAPI.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+RUN apk -qq update && apk -yqq add krb5 icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+COPY ["../krb5.conf", "/etc/krb5.conf"]
+
+#SET KRB5_KTNAME 
+
 ENTRYPOINT ["dotnet", "CohoWineryAPI.dll"]
