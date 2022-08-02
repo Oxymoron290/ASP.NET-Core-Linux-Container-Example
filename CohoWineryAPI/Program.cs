@@ -15,19 +15,25 @@ namespace CohoWineryAPI
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("Coho-Winery app started...");
+            System.Threading.Thread.Sleep(10000);
+            Console.WriteLine("Checking for token...");
             var host = CreateHostBuilder(args).Build();
-
             try
             {
                 using (var scope = host.Services.CreateScope())
                 {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogInformation("Creating Database...");
                     var db = scope.ServiceProvider.GetRequiredService<Data.VineyardContext>();
                     db.Database.Migrate();
+                    logger.LogInformation("Database Created...");
                 }
             } 
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
+                throw;
             }
 
             host.Run();
