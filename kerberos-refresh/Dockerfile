@@ -3,7 +3,6 @@ FROM alpine
 RUN apk -qq update && apk -yqq add krb5 && mkdir /krb5 && chmod 755 /krb5
 
 COPY ["./kerberos-refresh.sh", "/"]
-COPY ["./krb5.conf", "/etc/krb5.conf"]
 
 # configure the exported volumes
  # /krb5 - default keytab location

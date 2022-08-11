@@ -22,7 +22,6 @@ COPY --from=publish /app/publish .
 
 RUN apk -qq update && apk -yqq add krb5 icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-COPY ["../krb5.conf", "/etc/krb5.conf"]
 
 # configure the exported volumes
  # /krb5 - default keytab location
