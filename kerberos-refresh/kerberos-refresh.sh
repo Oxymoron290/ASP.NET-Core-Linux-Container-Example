@@ -16,10 +16,10 @@ do
   echo "*** kinit at " + $(date -I)
   kinit -V $OPTIONS $APPEND_OPTIONS
   klist -c /dev/shm/ccache 
-  if [[ -z "$INIT_ONLY" ]]; then
-    if [ klist -s ]; then
+  if [[ ! -z "$INIT_ONLY" ]]; then
+    #if [ klist -s ]; then
       exit 0;
-    fi
+    #fi
   fi
   echo "*** Waiting for $PERIOD_SECONDS seconds"
   sleep $PERIOD_SECONDS 
