@@ -16,7 +16,6 @@ namespace CohoWineryAPI
         public static void Main(string[] args)
         {
             Console.WriteLine("Coho-Winery app started...");
-            System.Threading.Thread.Sleep(10000);
             Console.WriteLine("Checking for token...");
             var host = CreateHostBuilder(args).Build();
             try
