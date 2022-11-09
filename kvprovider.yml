@@ -1,0 +1,19 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: azure-kv-secretprovider
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "true"                # Set to true for using managed identity
+    userAssignedIdentityID:  "355baa4e-4a8c-4b1e-9db4-4aaad77175c1" # Set the clientID of the user-assigned managed identity to use
+    keyvaultName: ContosoPOC-AKS               # Set to the name of your key vault
+    tenantId: "a250708e-8eb6-4006-a0a0-c4a16df193ab"                       # The tenant ID of the key vault
+    objects:  |
+      array:
+        - |
+          objectName: testdakt-aes128
+          objectType: secret                     # object types: secret, key, or cert
+          objectEncoding: "hex"
+          objectAlias: testda_aes128.keytab

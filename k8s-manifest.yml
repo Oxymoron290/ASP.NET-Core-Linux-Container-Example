@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kinit-coho-test
+spec:
+  initContainers:
+  - name: init-kinit
+  image: contosoacrpoc.azurecr.io/coho-winery/kerberos-sidecar
+    imagePullPolicy: Always
+    name: kinit
+    env:
+      - name: INIT_ONLY
+        value: "true"
+      - name: PERIOD_SECONDS
+        value: "10"
+      - name: OPTIONS
+        value: -k testda@CONTOSO.COM
+    volumeMounts:
+      - name: ccache
+        mountPath: /dev/shm
+      - name: krb5-config
+        mountPath: /etc/krb5.conf
+        subPath: krb5.conf
+      - name: keytab-vol-csi
+        mountPath: /krb5
+        readOnly: true
+
+  containers:
+  - image: contosoacrpoc.azurecr.io/coho-winery/kerberos-sidecar
+    imagePullPolicy: Always
+    name: kinit
+    env:
+      - name: PERIOD_SECONDS
+        value: "10"
+      - name: OPTIONS
+        value: -k testda@CONTOSO.COM
+    volumeMounts:
+      - name: ccache
+        mountPath: /dev/shm
+      - name: krb5-config
+        mountPath: /etc/krb5.conf
+        subPath: krb5.conf
+      - name: keytab-vol-csi
+        mountPath: /krb5
+        readOnly: true
+
+  - image: contosoacrpoc.azurecr.io/coho-winery/coho-test
+    imagePullPolicy: Always
+    name: coho-test
+    env:
+    - name: ConnectionStrings__VineyardContext
+      value: "Server=sql2.contoso.com, 1433;Database=vineyard;Trusted_Connection=True;"
+    - name: Logging__LogLevel__Default
+      value: "Information"
+    - name: Logging__LogLevel__Microsoft
+      value: "Warning"
+    volumeMounts:
+      - name: ccache
+        mountPath: /dev/shm
+      - name: krb5-config
+        mountPath: /etc/krb5.conf
+        subPath: krb5.conf
+      - name: keytab-vol-csi
+        mountPath: /krb5
+        readOnly: true  
+        
+  volumes:
+    - name: ccache           # Shared memory volume for tokens
+      emptyDir: {}
+    - name: krb5-config      # ConfigMap volume for krb5.conf 
+      configMap:
+        name: krb5config
+        items:
+          - key: krb5.conf
+            path: krb5.conf
+    - name: keytab-vol-csi   # AKV Secrets volume for keytab 
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "azure-kv-secretprovider"
